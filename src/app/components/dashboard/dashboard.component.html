@@ -1,0 +1,192 @@
+<ng-container *transloco="let t">
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <img src="brand_logo.svg" [attr.alt]="t('header.brandAlt')" class="brand-logo">
+      <span class="brand-divider">|</span>
+      <span class="brand-subtitle">{{ t('header.subtitle') }}</span>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <h1 class="page-title">{{ t('dashboard.title') }}</h1>
+      <div class="tab-group">
+        <button
+          class="tab-btn"
+          [class.active]="activeTab() === 'all'"
+          (click)="setActiveTab('all')">
+          {{ t('dashboard.tabs.allIdeas') }}
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab() === 'my'"
+          (click)="setActiveTab('my')">
+          {{ t('dashboard.tabs.myIdeas') }}
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab() === 'top'"
+          (click)="setActiveTab('top')">
+          {{ t('dashboard.tabs.topIdeas') }}
+        </button>
+      </div>
+    </div>
+
+    <div class="toolbar-center">
+      <div class="filter-group">
+        <label class="filter-label">{{ t('dashboard.filters.statusFilter') }}</label>
+        <select
+          class="filter-select"
+          [ngModel]="statusFilterInput()"
+          (ngModelChange)="onStatusFilterChange($event)">
+          @for (option of statusOptions; track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">{{ t('dashboard.filters.selectReturns') }}</label>
+        <select class="filter-select">
+          <option>{{ t('dashboard.filters.selectDataSelect') }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="toolbar-right">
+      <button class="action-btn create-btn" (click)="openCreateDialog()">{{ t('dashboard.actions.createNewIdea') }}</button>
+      <button class="action-btn export-btn">{{ t('dashboard.actions.exportToExcel') }}</button>
+      <button class="action-btn clear-btn">{{ t('dashboard.actions.clearFilters') }}</button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper">
+    <table class="ideas-table">
+      <thead>
+        <tr class="table-header-row">
+          <th class="col-id">{{ t('dashboard.table.id') }}</th>
+          <th class="col-title">{{ t('dashboard.table.ideaTitle') }}</th>
+          <th class="col-owner">{{ t('dashboard.table.ideaOwner') }}</th>
+          <th class="col-date">{{ t('dashboard.table.submittedDate') }}</th>
+          <th class="col-votes">{{ t('dashboard.table.votes') }}</th>
+          <th class="col-action">{{ t('dashboard.table.action') }}</th>
+        </tr>
+        <tr class="table-filter-row">
+          <td class="col-id">
+            <div class="filter-cell">
+              <input
+                type="text"
+                class="filter-input filter-input-id"
+                placeholder=""
+                [ngModel]="idSearch()"
+                (ngModelChange)="onIdSearch($event)">
+              <img src="filter_icon.svg" [attr.alt]="t('dashboard.filters.filterAlt')" class="filter-icon">
+            </div>
+          </td>
+          <td class="col-title">
+            <input
+              type="text"
+              class="filter-input"
+              [placeholder]="t('dashboard.filters.ideaByStatus')"
+              [ngModel]="titleSearch()"
+              (ngModelChange)="titleSearch.set($event)">
+          </td>
+          <td class="col-owner">
+            <div class="filter-cell">
+              <input
+                type="text"
+                class="filter-input"
+                [placeholder]="t('dashboard.filters.ideaByCategory')"
+                [ngModel]="categorySearch()"
+                (ngModelChange)="categorySearch.set($event)">
+              <img src="filter_icon.svg" [attr.alt]="t('dashboard.filters.filterAlt')" class="filter-icon">
+            </div>
+          </td>
+          <td class="col-date">
+            <div class="filter-cell">
+              <img src="filter_icon.svg" [attr.alt]="t('dashboard.filters.filterAlt')" class="filter-icon">
+              <input
+                type="text"
+                class="filter-input"
+                [placeholder]="t('dashboard.filters.ideaByGesCenter')"
+                [ngModel]="gesCenterSearch()"
+                (ngModelChange)="gesCenterSearch.set($event)">
+            </div>
+          </td>
+          <td class="col-votes"></td>
+          <td class="col-action"></td>
+        </tr>
+      </thead>
+      <tbody>
+        @for (idea of ideas(); track trackByIdeaId($index, idea)) {
+          <tr class="table-body-row">
+            <td class="col-id">{{ idea.id }}</td>
+            <td class="col-title">{{ idea.title }}</td>
+            <td class="col-owner">{{ idea.owner }}</td>
+            <td class="col-date">{{ idea.submittedDate }}</td>
+            <td class="col-votes">
+              <span class="vote-badge">
+                <span class="star-icon">&#9733;</span>
+                {{ idea.votes }}
+              </span>
+            </td>
+            <td class="col-action">
+              <div class="action-icons">
+                <button class="icon-btn edit-btn" [title]="t('dashboard.table.edit')" (click)="openEditDialog(idea)">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--color-info)">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                  </svg>
+                </button>
+                <button class="icon-btn like-btn" [title]="t('dashboard.table.like')">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--color-success)">
+                    <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
+                  </svg>
+                </button>
+                <button class="icon-btn delete-btn" [title]="t('dashboard.table.delete')">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="var(--color-danger)">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-bar">
+    <span class="pagination-info">
+      {{ paginationStart() }} {{ t('dashboard.pagination.to') }} {{ paginationEnd() }} {{ t('dashboard.pagination.of') }} {{ totalFiltered() }}
+    </span>
+    <div class="pagination-controls">
+      <span class="page-label">{{ t('dashboard.pagination.page') }} {{ pagination().currentPage }} {{ t('dashboard.pagination.of') }} {{ totalPages() }}</span>
+      <button
+        class="page-btn"
+        [disabled]="pagination().currentPage <= 1"
+        (click)="previousPage()">
+        &lt;
+      </button>
+      <button
+        class="page-btn"
+        [disabled]="pagination().currentPage >= totalPages()"
+        (click)="nextPage()">
+        &gt;
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Idea Dialog Modal -->
+@if (showDialog()) {
+  <app-idea-dialog
+    [mode]="dialogMode()"
+    [idea]="editingIdea()"
+    (closeDialog)="closeDialog()"
+    (submitIdea)="onIdeaSubmit($event)" />
+}
+</ng-container>

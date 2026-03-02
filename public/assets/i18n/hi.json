@@ -1,0 +1,61 @@
+{
+  "header": {
+    "brandAlt": "हनीवेल",
+    "subtitle": "जीईएस आइडिया सेंटर"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "tabs": {
+      "allIdeas": "सभी विचार",
+      "myIdeas": "मेरे विचार",
+      "topIdeas": "शीर्ष विचार"
+    },
+    "filters": {
+      "statusFilter": "स्थिति फ़िल्टर",
+      "selectReturns": "अपने रिटर्न चुनें",
+      "selectDataSelect": "चुनें(डेटा चयन)",
+      "ideaByStatus": "स्थिति के अनुसार विचार",
+      "ideaByCategory": "श्रेणी के अनुसार विचार",
+      "ideaByGesCenter": "जीईएस केंद्र के अनुसार विचार",
+      "filterAlt": "फ़िल्टर"
+    },
+    "actions": {
+      "createNewIdea": "नया विचार बनाएं",
+      "exportToExcel": "एक्सेल में निर्यात करें",
+      "clearFilters": "फ़िल्टर साफ़ करें"
+    },
+    "table": {
+      "id": "आईडी",
+      "ideaTitle": "विचार शीर्षक",
+      "ideaOwner": "विचार स्वामी",
+      "submittedDate": "जमा करने की तारीख",
+      "votes": "वोट",
+      "action": "कार्रवाई",
+      "edit": "संपादित करें",
+      "like": "पसंद करें",
+      "delete": "हटाएं"
+    },
+    "pagination": {
+      "to": "से",
+      "of": "का",
+      "page": "पृष्ठ"
+    }
+  },
+  "dialog": {
+    "createTitle": "विचार बनाएं",
+    "editTitle": "विचार संपादित करें",
+    "ideaTitle": "विचार शीर्षक",
+    "ideaType": "विचार प्रकार",
+    "description": "विवरण",
+    "gesCenter": "जीईएस केंद्र",
+    "contributeOnBehalfOf": "की ओर से योगदान करें",
+    "findItems": "आइटम खोजें",
+    "coContributors": "सह-योगदानकर्ता",
+    "attachments": "संलग्नक",
+    "nothingAttached": "कुछ भी संलग्न नहीं है।",
+    "attachFile": "फ़ाइल संलग्न करें",
+    "backToDashboard": "डैशबोर्ड पर वापस जाएं",
+    "reset": "रीसेट",
+    "submit": "जमा करें"
+  }
+}

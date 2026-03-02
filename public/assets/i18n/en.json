@@ -1,0 +1,61 @@
+{
+  "header": {
+    "brandAlt": "Honeywell",
+    "subtitle": "GES IDEA CENTER"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "tabs": {
+      "allIdeas": "ALL IDEAS",
+      "myIdeas": "MY IDEAS",
+      "topIdeas": "TOP IDEAS"
+    },
+    "filters": {
+      "statusFilter": "Status Filter",
+      "selectReturns": "Select your returns",
+      "selectDataSelect": "select(DataSelect)",
+      "ideaByStatus": "Idea by Status",
+      "ideaByCategory": "Idea by Category",
+      "ideaByGesCenter": "Idea by GES Center",
+      "filterAlt": "Filter"
+    },
+    "actions": {
+      "createNewIdea": "CREATE NEW IDEA",
+      "exportToExcel": "EXPORT TO EXCEL",
+      "clearFilters": "CLEAR FILTERS"
+    },
+    "table": {
+      "id": "ID",
+      "ideaTitle": "Idea Title",
+      "ideaOwner": "Idea Owner",
+      "submittedDate": "Submitted Date",
+      "votes": "Votes",
+      "action": "Action",
+      "edit": "Edit",
+      "like": "Like",
+      "delete": "Delete"
+    },
+    "pagination": {
+      "to": "to",
+      "of": "of",
+      "page": "Page"
+    }
+  },
+  "dialog": {
+    "createTitle": "Create Idea",
+    "editTitle": "Edit Idea",
+    "ideaTitle": "Idea Title",
+    "ideaType": "Idea Type",
+    "description": "Description",
+    "gesCenter": "GESCenter",
+    "contributeOnBehalfOf": "Contribute on behalf of",
+    "findItems": "Find Items",
+    "coContributors": "Co-Contributors",
+    "attachments": "Attachments",
+    "nothingAttached": "There is nothing attached.",
+    "attachFile": "Attach file",
+    "backToDashboard": "Back to Dashboard",
+    "reset": "Reset",
+    "submit": "Submit"
+  }
+}
