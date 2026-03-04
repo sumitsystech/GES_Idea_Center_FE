@@ -1,12 +1,12 @@
 export interface Idea {
   readonly id: number;
   readonly title: string;
-  readonly owner: string;
-  readonly submittedDate: string;
+  readonly type: string;
+  readonly description: string;
+  readonly gesCenterId: string;
+  readonly contributorId: string;
+  readonly coContributors: string;
   readonly votes: number;
-  readonly status: string;
-  readonly category: string;
-  readonly gesCenter: string;
 }
 
 export type StatusFilter = 'All' | 'Not Approved' | 'Approved' | 'Under Review' | 'Implemented';
@@ -24,6 +24,7 @@ export interface IdeaFormData {
   gesCenter: string;
   contributeOnBehalfOf: string;
   coContributors: string;
+  file: File | null;
 }
 
 export interface IdeaDialogConfig {

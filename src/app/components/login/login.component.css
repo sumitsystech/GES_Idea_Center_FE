@@ -1,0 +1,150 @@
+.login-page {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Login Wrapper ── */
+.login-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.login-card {
+  background: var(--color-white);
+  border-radius: 6px;
+  width: 440px;
+  max-width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+/* ── Card Logo ── */
+.card-logo {
+  padding: 28px 32px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.brand-logo {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+/* ── Card Header ── */
+.card-header {
+  padding: 20px 32px 0;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* ── Card Body ── */
+.card-body {
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.required {
+  color: var(--color-primary);
+  margin-left: 2px;
+}
+
+.form-control {
+  padding: 10px 12px;
+  font-size: var(--font-size-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-white);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  transition: border-color 0.15s;
+}
+
+.form-control:focus {
+  border-color: var(--color-info);
+}
+
+.forgot-password {
+  text-align: right;
+}
+
+.forgot-password a {
+  font-size: var(--font-size-sm);
+  color: var(--color-info);
+  transition: opacity 0.15s;
+}
+
+.forgot-password a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* ── Card Footer ── */
+.card-footer {
+  padding: 0 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 10px;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: var(--border-radius);
+  background: var(--color-primary);
+  color: var(--color-white);
+  transition: background 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.toggle-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}
+
+.toggle-text a {
+  color: var(--color-info);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.toggle-text a:hover {
+  text-decoration: underline;
+}

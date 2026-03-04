@@ -15,6 +15,7 @@ import { Idea, IdeaFormData } from '../../models/idea.model';
 export class IdeaDialogComponent implements OnInit {
   readonly mode = input.required<'create' | 'edit'>();
   readonly idea = input<Idea | null>(null);
+  readonly isSubmitting = input<boolean>(false);
 
   readonly closeDialog = output<void>();
   readonly submitIdea = output<IdeaFormData>();
@@ -27,7 +28,13 @@ export class IdeaDialogComponent implements OnInit {
     description: '',
     gesCenter: '',
     contributeOnBehalfOf: '',
-    coContributors: ''
+    coContributors: '',
+    file: null
+  });
+
+  readonly fileName = computed(() => {
+    const f = this.formData().file;
+    return f ? f.name : null;
   });
 
   readonly ideaTypeOptions = [
@@ -41,22 +48,50 @@ export class IdeaDialogComponent implements OnInit {
 
   readonly gesCenterOptions = ['Pune', 'Chennai', 'Bangalore', 'Shanghai', 'Phoenix'];
 
+  readonly contributorOptions = [
+    'John Smith',
+    'Emily Johnson',
+    'Michael Brown',
+    'Sarah Davis',
+    'James Wilson',
+    'Laura Martinez',
+    'Robert Taylor'
+  ];
+
+  readonly coContributorOptions = [
+    'Daniel Anderson',
+    'Jessica Thomas',
+    'William Jackson',
+    'Olivia White',
+    'David Harris',
+    'Sophia Clark',
+    'Christopher Lewis'
+  ];
+
   ngOnInit(): void {
     const currentIdea = this.idea();
     if (this.mode() === 'edit' && currentIdea) {
       this.formData.set({
         ideaTitle: currentIdea.title,
-        ideaType: currentIdea.category,
-        description: '',
-        gesCenter: currentIdea.gesCenter,
-        contributeOnBehalfOf: '',
-        coContributors: ''
+        ideaType: currentIdea.type,
+        description: currentIdea.description,
+        gesCenter: currentIdea.gesCenterId,
+        contributeOnBehalfOf: currentIdea.contributorId,
+        coContributors: currentIdea.coContributors,
+        file: null
       });
     }
   }
 
   updateField(field: keyof IdeaFormData, value: string): void {
     this.formData.update(current => ({ ...current, [field]: value }));
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.formData.update(current => ({ ...current, file: input.files![0] }));
+    }
   }
 
   onClose(): void {
@@ -73,7 +108,8 @@ export class IdeaDialogComponent implements OnInit {
         description: '',
         gesCenter: '',
         contributeOnBehalfOf: '',
-        coContributors: ''
+        coContributors: '',
+        file: null
       });
     }
   }

@@ -1,7 +1,8 @@
 {
   "header": {
     "brandAlt": "Honeywell",
-    "subtitle": "GES IDEA CENTER"
+    "subtitle": "GES IDEA CENTER",
+    "logout": "Logout"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -17,7 +18,8 @@
       "ideaByStatus": "Idea by Status",
       "ideaByCategory": "Idea by Category",
       "ideaByGesCenter": "Idea by GES Center",
-      "filterAlt": "Filter"
+      "filterAlt": "Filter",
+      "searchByTitleOrOwner": "Search by title or idea owner"
     },
     "actions": {
       "createNewIdea": "CREATE NEW IDEA",
@@ -27,19 +29,47 @@
     "table": {
       "id": "ID",
       "ideaTitle": "Idea Title",
-      "ideaOwner": "Idea Owner",
-      "submittedDate": "Submitted Date",
+      "type": "Type",
+      "gesCenter": "GES Center",
+      "contributor": "Contributor",
       "votes": "Votes",
       "action": "Action",
       "edit": "Edit",
       "like": "Like",
-      "delete": "Delete"
+      "delete": "Delete",
+      "loading": "Loading...",
+      "noData": "No ideas found."
     },
     "pagination": {
       "to": "to",
       "of": "of",
       "page": "Page"
     }
+  },
+  "login": {
+    "signInTitle": "Sign In",
+    "signUpTitle": "Sign Up",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "usernameOrEmail": "Username or Email",
+    "usernameOrEmailPlaceholder": "Enter your username or email",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "forgotPassword": "Forgot Password?",
+    "signInBtn": "SIGN IN",
+    "signUpBtn": "SIGN UP",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "signInLink": "Sign In",
+    "signUpLink": "Sign Up",
+    "loginSuccess": "Login successful!",
+    "registerSuccess": "User created successfully",
+    "fillAllFields": "Please fill in all required fields.",
+    "passwordMismatch": "Passwords do not match."
   },
   "dialog": {
     "createTitle": "Create Idea",
@@ -56,6 +86,8 @@
     "attachFile": "Attach file",
     "backToDashboard": "Back to Dashboard",
     "reset": "Reset",
-    "submit": "Submit"
+    "submit": "Submit",
+    "ideaCreated": "Idea Created",
+    "ideaCreateFailed": "Failed to create idea. Please try again."
   }
 }

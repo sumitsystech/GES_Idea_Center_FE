@@ -1,9 +1,11 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslocoModule } from '@jsverse/transloco';
 import { IdeaService } from '../../services/idea.service';
-import { Idea, IdeaFormData, StatusFilter } from '../../models/idea.model';
+import { SnackbarService } from '../../services/snackbar.service';
+import { AuthService } from '../../services/auth.service';
+import { Idea, IdeaFormData } from '../../models/idea.model';
 import { IdeaDialogComponent } from '../idea-dialog/idea-dialog.component';
 
 @Component({
@@ -14,55 +16,68 @@ import { IdeaDialogComponent } from '../idea-dialog/idea-dialog.component';
   styleUrl: './dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   private readonly ideaService = inject(IdeaService);
+  private readonly snackbar = inject(SnackbarService);
+  private readonly authService = inject(AuthService);
+
+  private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly ideas = this.ideaService.paginatedIdeas;
-  readonly totalFiltered = this.ideaService.totalFilteredItems;
+  readonly totalItems = this.ideaService.totalItems;
   readonly pagination = this.ideaService.pagination;
   readonly totalPages = this.ideaService.totalPages;
   readonly loading = this.ideaService.loading;
-  readonly statusFilter = this.ideaService.statusFilter;
 
   readonly activeTab = signal<'all' | 'my' | 'top'>('all');
-  readonly idSearch = signal<string>('');
-  readonly statusFilterInput = signal<StatusFilter>('Not Approved');
-  readonly titleSearch = signal<string>('');
-  readonly categorySearch = signal<string>('');
-  readonly gesCenterSearch = signal<string>('');
+  readonly searchInput = signal<string>('');
+  readonly idSearchInput = signal<string>('');
 
-  readonly statusOptions: StatusFilter[] = ['All', 'Not Approved', 'Approved', 'Under Review', 'Implemented'];
-
-  readonly gesCenterOptions = ['All', 'Pune', 'Chennai', 'Bangalore'];
-
-  readonly selectedGesCenter = signal<string>('All');
+  readonly likedIds = signal<Set<number>>(new Set());
 
   readonly showDialog = signal<boolean>(false);
   readonly dialogMode = signal<'create' | 'edit'>('create');
   readonly editingIdea = signal<Idea | null>(null);
+  readonly dialogSubmitting = signal<boolean>(false);
 
   readonly paginationStart = computed(() => {
     const p = this.pagination();
-    return this.totalFiltered() === 0 ? 0 : (p.currentPage - 1) * p.pageSize + 1;
+    return this.totalItems() === 0 ? 0 : (p.currentPage - 1) * p.pageSize + 1;
   });
 
   readonly paginationEnd = computed(() => {
     const p = this.pagination();
-    return Math.min(p.currentPage * p.pageSize, this.totalFiltered());
+    return Math.min(p.currentPage * p.pageSize, this.totalItems());
   });
+
+  ngOnInit(): void {
+    this.ideaService.loadIdeas();
+  }
 
   setActiveTab(tab: 'all' | 'my' | 'top'): void {
     this.activeTab.set(tab);
   }
 
-  onStatusFilterChange(status: StatusFilter): void {
-    this.statusFilterInput.set(status);
-    this.ideaService.setStatusFilter(status);
+  onIdSearch(value: string): void {
+    this.idSearchInput.set(value);
+    this.ideaService.setSearchId(value);
   }
 
-  onIdSearch(id: string): void {
-    this.idSearch.set(id);
-    this.ideaService.setSearchId(id);
+  onSearchInput(value: string): void {
+    this.searchInput.set(value);
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+    this.searchDebounceTimer = setTimeout(() => {
+      this.ideaService.loadIdeas(value);
+    }, 400);
+  }
+
+  clearFilters(): void {
+    this.searchInput.set('');
+    this.idSearchInput.set('');
+    this.ideaService.clearSearch();
+    this.ideaService.loadIdeas();
   }
 
   goToPage(page: number): void {
@@ -94,11 +109,59 @@ export class DashboardComponent {
     this.editingIdea.set(null);
   }
 
-  onIdeaSubmit(_formData: IdeaFormData): void {
-    this.closeDialog();
+  onIdeaSubmit(formData: IdeaFormData): void {
+    if (this.dialogMode() === 'create') {
+      this.dialogSubmitting.set(true);
+      this.ideaService.createIdea(formData).subscribe({
+        next: (response) => {
+          this.snackbar.showSuccess(response || 'Idea Created');
+          this.dialogSubmitting.set(false);
+          this.closeDialog();
+          this.ideaService.loadIdeas(this.searchInput());
+        },
+        error: () => {
+          this.dialogSubmitting.set(false);
+        }
+      });
+    } else {
+      this.closeDialog();
+    }
   }
 
-  trackByIdeaId(_index: number, idea: { id: number }): number {
+  toggleLike(ideaId: number): void {
+    const isCurrentlyLiked = this.likedIds().has(ideaId);
+    const isUpVote = !isCurrentlyLiked;
+
+    this.ideaService.voteIdea(ideaId, isUpVote).subscribe({
+      next: (response) => {
+        this.snackbar.showSuccess(response || 'Vote Added');
+        this.likedIds.update(ids => {
+          const updated = new Set(ids);
+          if (isUpVote) {
+            updated.add(ideaId);
+          } else {
+            updated.delete(ideaId);
+          }
+          return updated;
+        });
+        this.ideaService.updateVoteCount(ideaId, isUpVote ? 1 : -1);
+      }
+    });
+  }
+
+  isLiked(ideaId: number): boolean {
+    return this.likedIds().has(ideaId);
+  }
+
+  onExport(): void {
+    this.ideaService.exportToExcel();
+  }
+
+  onLogout(): void {
+    this.authService.logout();
+  }
+
+  trackByIdeaId(_index: number, idea: Idea): number {
     return idea.id;
   }
 }

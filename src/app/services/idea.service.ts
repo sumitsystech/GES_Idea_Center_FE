@@ -1,41 +1,40 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { Idea, PaginationState, StatusFilter } from '../models/idea.model';
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, catchError, throwError } from 'rxjs';
+import { Idea, IdeaFormData, PaginationState } from '../models/idea.model';
+import { environment } from '../../environments/environment';
+import { SnackbarService } from './snackbar.service';
 
 @Injectable({ providedIn: 'root' })
 export class IdeaService {
-  private readonly ideasState = signal<Idea[]>(MOCK_IDEAS);
+  private readonly http = inject(HttpClient);
+  private readonly snackbar = inject(SnackbarService);
+
+  private readonly allIdeasState = signal<Idea[]>([]);
   private readonly loadingState = signal<boolean>(false);
   private readonly errorState = signal<string | null>(null);
-  private readonly statusFilterState = signal<StatusFilter>('Not Approved');
   private readonly searchIdState = signal<string>('');
   private readonly paginationState = signal<PaginationState>({
     currentPage: 1,
     pageSize: 10,
-    totalItems: MOCK_IDEAS.length
+    totalItems: 0
   });
 
-  readonly ideas = this.ideasState.asReadonly();
   readonly loading = this.loadingState.asReadonly();
   readonly error = this.errorState.asReadonly();
-  readonly statusFilter = this.statusFilterState.asReadonly();
-  readonly searchId = this.searchIdState.asReadonly();
   readonly pagination = this.paginationState.asReadonly();
 
   readonly filteredIdeas = computed(() => {
-    let filtered = this.ideasState();
-    const status = this.statusFilterState();
-    const id = this.searchIdState();
+    let filtered = this.allIdeasState();
+    const idTerm = this.searchIdState().trim();
 
-    if (status !== 'All') {
-      filtered = filtered.filter(idea => idea.status === status);
-    }
-    if (id) {
-      filtered = filtered.filter(idea => idea.id.toString().includes(id));
+    if (idTerm) {
+      filtered = filtered.filter(idea => idea.id.toString().includes(idTerm));
     }
     return filtered;
   });
 
-  readonly totalFilteredItems = computed(() => this.filteredIdeas().length);
+  readonly totalItems = computed(() => this.filteredIdeas().length);
 
   readonly paginatedIdeas = computed(() => {
     const page = this.paginationState();
@@ -44,17 +43,45 @@ export class IdeaService {
   });
 
   readonly totalPages = computed(() =>
-    Math.ceil(this.totalFilteredItems() / this.paginationState().pageSize)
+    Math.ceil(this.totalItems() / this.paginationState().pageSize) || 1
   );
 
-  setStatusFilter(status: StatusFilter): void {
-    this.statusFilterState.set(status);
-    this.resetToFirstPage();
+  loadIdeas(search?: string): void {
+    this.loadingState.set(true);
+    this.errorState.set(null);
+
+    let params = new HttpParams();
+    if (search && search.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    this.http.get<Idea[]>(`${environment.apiBaseUrl}/Idea`, { params }).subscribe({
+      next: (ideas) => {
+        this.allIdeasState.set(ideas);
+        this.paginationState.update(p => ({
+          ...p,
+          currentPage: 1,
+          totalItems: ideas.length
+        }));
+        this.loadingState.set(false);
+      },
+      error: (error) => {
+        const message = error?.error || 'Failed to load ideas.';
+        this.errorState.set(typeof message === 'string' ? message : 'Failed to load ideas.');
+        this.snackbar.showError(typeof message === 'string' ? message : 'Failed to load ideas.');
+        this.loadingState.set(false);
+      }
+    });
   }
 
   setSearchId(id: string): void {
     this.searchIdState.set(id);
-    this.resetToFirstPage();
+    this.paginationState.update(p => ({ ...p, currentPage: 1 }));
+  }
+
+  clearSearch(): void {
+    this.searchIdState.set('');
+    this.paginationState.update(p => ({ ...p, currentPage: 1 }));
   }
 
   goToPage(page: number): void {
@@ -72,200 +99,60 @@ export class IdeaService {
     this.goToPage(this.paginationState().currentPage - 1);
   }
 
-  private resetToFirstPage(): void {
-    this.paginationState.update(p => ({ ...p, currentPage: 1 }));
+  exportToExcel(): void {
+    this.http.get(`${environment.apiBaseUrl}/Idea/export`, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = 'ideas-export.xlsx';
+        anchor.click();
+        URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        const message = error?.error || 'Failed to export ideas.';
+        this.snackbar.showError(typeof message === 'string' ? message : 'Failed to export ideas.');
+      }
+    });
+  }
+
+  voteIdea(ideaId: number, isUpVote: boolean): Observable<string> {
+    return this.http.post(`${environment.apiBaseUrl}/Idea/vote`, { ideaId, isUpVote }, { responseType: 'text' }).pipe(
+      catchError(error => {
+        const message = error?.error || 'Failed to vote. Please try again.';
+        this.snackbar.showError(typeof message === 'string' ? message : 'Failed to vote.');
+        return throwError(() => error);
+      })
+    );
+  }
+
+  updateVoteCount(ideaId: number, delta: number): void {
+    this.allIdeasState.update(ideas =>
+      ideas.map(idea =>
+        idea.id === ideaId ? { ...idea, votes: idea.votes + delta } : idea
+      )
+    );
+  }
+
+  createIdea(formData: IdeaFormData): Observable<string> {
+    const body = new FormData();
+    body.append('Title', formData.ideaTitle);
+    body.append('Type', formData.ideaType);
+    body.append('Description', formData.description);
+    body.append('GESCenterId', formData.gesCenter);
+    body.append('ContributorId', formData.contributeOnBehalfOf);
+    body.append('CoContributors', formData.coContributors);
+    body.append('AttachmentPath', '');
+    if (formData.file) {
+      body.append('file', formData.file, formData.file.name);
+    }
+
+    return this.http.post(`${environment.apiBaseUrl}/Idea`, body, { responseType: 'text' }).pipe(
+      catchError(error => {
+        const message = error?.error || 'Failed to create idea. Please try again.';
+        this.snackbar.showError(typeof message === 'string' ? message : 'Failed to create idea.');
+        return throwError(() => error);
+      })
+    );
   }
 }
-
-const MOCK_IDEAS: Idea[] = [
-  {
-    id: 542,
-    title: 'I/O Mapping in ControlEdge Builder: Integrating Channel Assignment into the EC Programming Workspace',
-    owner: 'Swapnil Shirke',
-    submittedDate: '19/02/2026 14:31',
-    votes: 2,
-    status: 'Not Approved',
-    category: 'Engineering',
-    gesCenter: 'Pune'
-  },
-  {
-    id: 541,
-    title: 'SafeView configuration Tool',
-    owner: 'Vidya D Mujumale',
-    submittedDate: '14/01/2026 20:36',
-    votes: 2,
-    status: 'Not Approved',
-    category: 'Engineering',
-    gesCenter: 'Pune'
-  },
-  {
-    id: 540,
-    title: 'HMI – Web display builder shall have a Simple static-Table addition option.',
-    owner: 'Vidya D Mujumale',
-    submittedDate: '14/01/2026 14:38',
-    votes: 0,
-    status: 'Not Approved',
-    category: 'Engineering',
-    gesCenter: 'Pune'
-  },
-  {
-    id: 539,
-    title: 'Interlock should have AUTO update of upstream based on input connection',
-    owner: 'Shruti Satish Dalvi',
-    submittedDate: '11/12/2025 17:45',
-    votes: 0,
-    status: 'Not Approved',
-    category: 'Engineering',
-    gesCenter: 'Pune'
-  },
-  {
-    id: 538,
-    title: 'Accelerated Migration and Expansion with Experion Flex & Console Station VM Templates for Enabled Services Customers',
-    owner: 'Arun Raj Nagarajan',
-    submittedDate: '09/12/2025 23:58',
-    votes: 0,
-    status: 'Not Approved',
-    category: 'Services',
-    gesCenter: 'Chennai'
-  },
-  {
-    id: 537,
-    title: 'Automatic Experion Patch installation on New Machines',
-    owner: 'Subramonian Veerappan',
-    submittedDate: '04/12/2025 03:32',
-    votes: 1,
-    status: 'Not Approved',
-    category: 'Engineering',
-    gesCenter: 'Chennai'
-  },
-  {
-    id: 536,
-    title: 'New tool for compatibility matrix',
-    owner: 'Harishkein Panneer Selvam',
-    submittedDate: '26/11/2025 04:05',
-    votes: 0,
-    status: 'Not Approved',
-    category: 'Engineering',
-    gesCenter: 'Chennai'
-  },
-  {
-    id: 535,
-    title: 'Enhancement of Controller Migration',
-    owner: 'Harishkein Panneer Selvam',
-    submittedDate: '26/11/2025 03:36',
-    votes: 2,
-    status: 'Not Approved',
-    category: 'Engineering',
-    gesCenter: 'Chennai'
-  },
-  {
-    id: 534,
-    title: 'Enhancement of orderitem position',
-    owner: 'Harishkein Panneer Selvam',
-    submittedDate: '26/11/2025 02:57',
-    votes: 0,
-    status: 'Not Approved',
-    category: 'Engineering',
-    gesCenter: 'Chennai'
-  },
-  {
-    id: 533,
-    title: 'Enhancement of CAB Block propagation',
-    owner: 'Harishkein Panneer Selvam',
-    submittedDate: '26/11/2025 02:40',
-    votes: 1,
-    status: 'Not Approved',
-    category: 'Engineering',
-    gesCenter: 'Chennai'
-  },
-  {
-    id: 532,
-    title: 'SharePoint-Driven Review and Approval for Project Deliverables',
-    owner: 'Guruswant Patil',
-    submittedDate: '16/11/2025 05:00',
-    votes: 1,
-    status: 'Not Approved',
-    category: 'Services',
-    gesCenter: 'Pune'
-  },
-  {
-    id: 531,
-    title: 'Automated Regression Testing Framework',
-    owner: 'Rajesh Kumar',
-    submittedDate: '10/11/2025 10:20',
-    votes: 3,
-    status: 'Approved',
-    category: 'Engineering',
-    gesCenter: 'Bangalore'
-  },
-  {
-    id: 530,
-    title: 'Cloud-Based Monitoring Dashboard',
-    owner: 'Priya Sharma',
-    submittedDate: '05/11/2025 08:15',
-    votes: 5,
-    status: 'Approved',
-    category: 'Engineering',
-    gesCenter: 'Pune'
-  },
-  {
-    id: 529,
-    title: 'AI-Powered Predictive Maintenance Module',
-    owner: 'Vikram Singh',
-    submittedDate: '01/11/2025 14:30',
-    votes: 4,
-    status: 'Under Review',
-    category: 'Innovation',
-    gesCenter: 'Chennai'
-  },
-  {
-    id: 528,
-    title: 'Unified API Gateway for Microservices',
-    owner: 'Meena Iyer',
-    submittedDate: '28/10/2025 09:45',
-    votes: 2,
-    status: 'Not Approved',
-    category: 'Engineering',
-    gesCenter: 'Bangalore'
-  },
-  {
-    id: 527,
-    title: 'Real-time Data Streaming Pipeline',
-    owner: 'Arjun Patel',
-    submittedDate: '25/10/2025 16:00',
-    votes: 1,
-    status: 'Implemented',
-    category: 'Engineering',
-    gesCenter: 'Pune'
-  },
-  {
-    id: 526,
-    title: 'Containerized Deployment Strategy',
-    owner: 'Deepa Nair',
-    submittedDate: '20/10/2025 11:30',
-    votes: 6,
-    status: 'Approved',
-    category: 'DevOps',
-    gesCenter: 'Chennai'
-  },
-  {
-    id: 525,
-    title: 'Automated Code Quality Gate',
-    owner: 'Suresh Menon',
-    submittedDate: '15/10/2025 13:00',
-    votes: 0,
-    status: 'Not Approved',
-    category: 'Engineering',
-    gesCenter: 'Pune'
-  },
-  {
-    id: 524,
-    title: 'Cross-Platform Mobile Application Framework',
-    owner: 'Kavita Reddy',
-    submittedDate: '10/10/2025 07:45',
-    votes: 3,
-    status: 'Under Review',
-    category: 'Engineering',
-    gesCenter: 'Bangalore'
-  }
-];

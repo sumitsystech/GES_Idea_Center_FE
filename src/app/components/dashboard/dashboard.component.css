@@ -10,6 +10,22 @@
   padding: 10px 24px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.logout-btn {
+  padding: 6px 16px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: var(--border-radius);
+  background: var(--color-primary);
+  color: var(--color-white);
+  transition: background 0.2s;
+}
+
+.logout-btn:hover {
+  background: var(--color-primary-dark);
 }
 
 .header-left {
@@ -226,16 +242,19 @@
 }
 
 .col-title {
-  min-width: 300px;
+  min-width: 250px;
 }
 
-.col-owner {
-  min-width: 180px;
+.col-type {
+  min-width: 120px;
 }
 
-.col-date {
-  min-width: 150px;
-  white-space: nowrap;
+.col-gesCenter {
+  min-width: 140px;
+}
+
+.col-contributor {
+  min-width: 140px;
 }
 
 .col-votes {
@@ -246,6 +265,14 @@
 .col-action {
   width: 140px;
   min-width: 140px;
+}
+
+.loading-cell,
+.empty-cell {
+  text-align: center;
+  padding: 32px 12px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
 }
 
 .vote-badge {
