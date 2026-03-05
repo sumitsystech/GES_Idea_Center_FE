@@ -19,7 +19,9 @@
       "ideaByCategory": "श्रेणी के अनुसार विचार",
       "ideaByGesCenter": "जीईएस केंद्र के अनुसार विचार",
       "filterAlt": "फ़िल्टर",
-      "searchByTitleOrOwner": "शीर्षक या विचार स्वामी द्वारा खोजें"
+      "searchByTitleOrOwner": "शीर्षक या विचार स्वामी द्वारा खोजें",
+      "allTypes": "सभी प्रकार",
+      "allCenters": "सभी केंद्र"
     },
     "actions": {
       "createNewIdea": "नया विचार बनाएं",

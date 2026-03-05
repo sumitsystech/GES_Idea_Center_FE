@@ -205,6 +205,11 @@
   width: 50px;
 }
 
+.filter-select {
+  cursor: pointer;
+  appearance: auto;
+}
+
 .filter-icon {
   width: 14px;
   height: 14px;

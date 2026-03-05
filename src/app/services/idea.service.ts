@@ -14,6 +14,8 @@ export class IdeaService {
   private readonly loadingState = signal<boolean>(false);
   private readonly errorState = signal<string | null>(null);
   private readonly searchIdState = signal<string>('');
+  private readonly filterTypeState = signal<string>('');
+  private readonly filterGesCenterState = signal<string>('');
   private readonly paginationState = signal<PaginationState>({
     currentPage: 1,
     pageSize: 10,
@@ -27,9 +29,17 @@ export class IdeaService {
   readonly filteredIdeas = computed(() => {
     let filtered = this.allIdeasState();
     const idTerm = this.searchIdState().trim();
+    const typeTerm = this.filterTypeState();
+    const gesCenterTerm = this.filterGesCenterState();
 
     if (idTerm) {
       filtered = filtered.filter(idea => idea.id.toString().includes(idTerm));
+    }
+    if (typeTerm) {
+      filtered = filtered.filter(idea => idea.type === typeTerm);
+    }
+    if (gesCenterTerm) {
+      filtered = filtered.filter(idea => idea.gesCenterId === gesCenterTerm);
     }
     return filtered;
   });
@@ -79,8 +89,20 @@ export class IdeaService {
     this.paginationState.update(p => ({ ...p, currentPage: 1 }));
   }
 
+  setFilterType(type: string): void {
+    this.filterTypeState.set(type);
+    this.paginationState.update(p => ({ ...p, currentPage: 1 }));
+  }
+
+  setFilterGesCenter(gesCenter: string): void {
+    this.filterGesCenterState.set(gesCenter);
+    this.paginationState.update(p => ({ ...p, currentPage: 1 }));
+  }
+
   clearSearch(): void {
     this.searchIdState.set('');
+    this.filterTypeState.set('');
+    this.filterGesCenterState.set('');
     this.paginationState.update(p => ({ ...p, currentPage: 1 }));
   }
 
@@ -131,6 +153,26 @@ export class IdeaService {
       ideas.map(idea =>
         idea.id === ideaId ? { ...idea, votes: idea.votes + delta } : idea
       )
+    );
+  }
+
+  updateIdea(id: number, formData: IdeaFormData): Observable<string> {
+    const body = {
+      id,
+      title: formData.ideaTitle,
+      type: formData.ideaType,
+      description: formData.description,
+      gesCenterId: formData.gesCenter,
+      contributorId: formData.contributeOnBehalfOf,
+      coContributors: formData.coContributors
+    };
+
+    return this.http.put(`${environment.apiBaseUrl}/Idea/update/${id}`, body, { responseType: 'text' }).pipe(
+      catchError(error => {
+        const message = error?.error || 'Failed to update idea. Please try again.';
+        this.snackbar.showError(typeof message === 'string' ? message : 'Failed to update idea.');
+        return throwError(() => error);
+      })
     );
   }
 

@@ -19,7 +19,9 @@
       "ideaByCategory": "Idea by Category",
       "ideaByGesCenter": "Idea by GES Center",
       "filterAlt": "Filter",
-      "searchByTitleOrOwner": "Search by title or idea owner"
+      "searchByTitleOrOwner": "Search by title or idea owner",
+      "allTypes": "All Types",
+      "allCenters": "All Centers"
     },
     "actions": {
       "createNewIdea": "CREATE NEW IDEA",

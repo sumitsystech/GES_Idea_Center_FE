@@ -73,8 +73,28 @@
               <img src="filter_icon.svg" [attr.alt]="t('dashboard.filters.filterAlt')" class="filter-icon">
             </div>
           </td>
-          <td class="col-type"></td>
-          <td class="col-gesCenter"></td>
+          <td class="col-type">
+            <select
+              class="filter-input filter-select"
+              [ngModel]="typeFilter()"
+              (ngModelChange)="onTypeFilter($event)">
+              <option value="">{{ t('dashboard.filters.allTypes') }}</option>
+              @for (type of ideaTypeOptions; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </td>
+          <td class="col-gesCenter">
+            <select
+              class="filter-input filter-select"
+              [ngModel]="gesCenterFilter()"
+              (ngModelChange)="onGesCenterFilter($event)">
+              <option value="">{{ t('dashboard.filters.allCenters') }}</option>
+              @for (center of gesCenterOptions; track center) {
+                <option [value]="center">{{ center }}</option>
+              }
+            </select>
+          </td>
           <td class="col-contributor">
             <div class="filter-cell">
               <input

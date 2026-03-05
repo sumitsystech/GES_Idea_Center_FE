@@ -32,6 +32,19 @@ export class DashboardComponent implements OnInit {
   readonly activeTab = signal<'all' | 'my' | 'top'>('all');
   readonly searchInput = signal<string>('');
   readonly idSearchInput = signal<string>('');
+  readonly typeFilter = signal<string>('');
+  readonly gesCenterFilter = signal<string>('');
+
+  readonly ideaTypeOptions = [
+    'Process Improvement',
+    'New Product',
+    'Cost Reduction',
+    'Safety Enhancement',
+    'Customer Experience',
+    'Technology Innovation'
+  ];
+
+  readonly gesCenterOptions = ['Pune', 'Chennai', 'Bangalore', 'Shanghai', 'Phoenix'];
 
   readonly likedIds = signal<Set<number>>(new Set());
 
@@ -63,6 +76,16 @@ export class DashboardComponent implements OnInit {
     this.ideaService.setSearchId(value);
   }
 
+  onTypeFilter(value: string): void {
+    this.typeFilter.set(value);
+    this.ideaService.setFilterType(value);
+  }
+
+  onGesCenterFilter(value: string): void {
+    this.gesCenterFilter.set(value);
+    this.ideaService.setFilterGesCenter(value);
+  }
+
   onSearchInput(value: string): void {
     this.searchInput.set(value);
     if (this.searchDebounceTimer) {
@@ -76,6 +99,8 @@ export class DashboardComponent implements OnInit {
   clearFilters(): void {
     this.searchInput.set('');
     this.idSearchInput.set('');
+    this.typeFilter.set('');
+    this.gesCenterFilter.set('');
     this.ideaService.clearSearch();
     this.ideaService.loadIdeas();
   }
@@ -124,7 +149,21 @@ export class DashboardComponent implements OnInit {
         }
       });
     } else {
-      this.closeDialog();
+      const editIdea = this.editingIdea();
+      if (editIdea) {
+        this.dialogSubmitting.set(true);
+        this.ideaService.updateIdea(editIdea.id, formData).subscribe({
+          next: (response) => {
+            this.snackbar.showSuccess(response || 'Idea Updated');
+            this.dialogSubmitting.set(false);
+            this.closeDialog();
+            this.ideaService.loadIdeas(this.searchInput());
+          },
+          error: () => {
+            this.dialogSubmitting.set(false);
+          }
+        });
+      }
     }
   }
 
