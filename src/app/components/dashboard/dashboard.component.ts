@@ -46,6 +46,8 @@ export class DashboardComponent implements OnInit {
 
   readonly gesCenterOptions = ['Pune', 'Chennai', 'Bangalore', 'Shanghai', 'Phoenix'];
 
+  readonly currentUserId = computed(() => this.authService.getUserId());
+
   readonly likedIds = signal<Set<number>>(new Set());
 
   readonly showDialog = signal<boolean>(false);
@@ -69,6 +71,11 @@ export class DashboardComponent implements OnInit {
 
   setActiveTab(tab: 'all' | 'my' | 'top'): void {
     this.activeTab.set(tab);
+    if (tab === 'my') {
+      this.ideaService.setFilterCreatedBy(this.currentUserId());
+    } else {
+      this.ideaService.setFilterCreatedBy(null);
+    }
   }
 
   onIdSearch(value: string): void {
@@ -190,6 +197,10 @@ export class DashboardComponent implements OnInit {
 
   isLiked(ideaId: number): boolean {
     return this.likedIds().has(ideaId);
+  }
+
+  canEdit(idea: Idea): boolean {
+    return idea.createdBy === this.currentUserId();
   }
 
   onExport(): void {

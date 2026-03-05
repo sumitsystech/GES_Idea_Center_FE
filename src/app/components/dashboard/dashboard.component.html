@@ -47,6 +47,7 @@
           <th class="col-type">{{ t('dashboard.table.type') }}</th>
           <th class="col-gesCenter">{{ t('dashboard.table.gesCenter') }}</th>
           <th class="col-contributor">{{ t('dashboard.table.contributor') }}</th>
+          <th class="col-date">{{ t('dashboard.table.createdDate') }}</th>
           <th class="col-votes">{{ t('dashboard.table.votes') }}</th>
           <th class="col-action">{{ t('dashboard.table.action') }}</th>
         </tr>
@@ -106,6 +107,7 @@
               <img src="filter_icon.svg" [attr.alt]="t('dashboard.filters.filterAlt')" class="filter-icon">
             </div>
           </td>
+          <td class="col-date"></td>
           <td class="col-votes"></td>
           <td class="col-action"></td>
         </tr>
@@ -113,11 +115,11 @@
       <tbody>
         @if (loading()) {
           <tr>
-            <td colspan="7" class="loading-cell">{{ t('dashboard.table.loading') }}</td>
+            <td colspan="8" class="loading-cell">{{ t('dashboard.table.loading') }}</td>
           </tr>
         } @else if (ideas().length === 0) {
           <tr>
-            <td colspan="7" class="empty-cell">{{ t('dashboard.table.noData') }}</td>
+            <td colspan="8" class="empty-cell">{{ t('dashboard.table.noData') }}</td>
           </tr>
         } @else {
           @for (idea of ideas(); track trackByIdeaId($index, idea)) {
@@ -127,6 +129,7 @@
               <td class="col-type">{{ idea.type }}</td>
               <td class="col-gesCenter">{{ idea.gesCenterId }}</td>
               <td class="col-contributor">{{ idea.contributorId }}</td>
+              <td class="col-date">{{ idea.createdDate | date:'dd/MM/yyyy' }}</td>
               <td class="col-votes">
                 <span class="vote-badge">
                   <span class="star-icon">&#9733;</span>
@@ -135,8 +138,8 @@
               </td>
               <td class="col-action">
                 <div class="action-icons">
-                  <button class="icon-btn edit-btn" [title]="t('dashboard.table.edit')" (click)="openEditDialog(idea)">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--color-info)">
+                  <button class="icon-btn edit-btn" [title]="t('dashboard.table.edit')" [disabled]="!canEdit(idea)" (click)="openEditDialog(idea)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" [attr.fill]="canEdit(idea) ? 'var(--color-info)' : '#BDBDBD'">
                       <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                     </svg>
                   </button>

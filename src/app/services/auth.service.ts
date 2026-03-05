@@ -99,6 +99,18 @@ export class AuthService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
+  getUserId(): number | null {
+    const token = this.getAccessToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const id = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+      return id ? Number(id) : null;
+    } catch {
+      return null;
+    }
+  }
+
   private storeTokens(response: LoginResponse): void {
     localStorage.setItem(TOKEN_KEY, response.accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);

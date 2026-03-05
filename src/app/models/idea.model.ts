@@ -6,6 +6,8 @@ export interface Idea {
   readonly gesCenterId: string;
   readonly contributorId: string;
   readonly coContributors: string;
+  readonly createdBy: number;
+  readonly createdDate: string;
   readonly votes: number;
 }
 

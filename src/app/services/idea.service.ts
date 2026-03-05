@@ -16,6 +16,7 @@ export class IdeaService {
   private readonly searchIdState = signal<string>('');
   private readonly filterTypeState = signal<string>('');
   private readonly filterGesCenterState = signal<string>('');
+  private readonly filterCreatedByState = signal<number | null>(null);
   private readonly paginationState = signal<PaginationState>({
     currentPage: 1,
     pageSize: 10,
@@ -31,7 +32,11 @@ export class IdeaService {
     const idTerm = this.searchIdState().trim();
     const typeTerm = this.filterTypeState();
     const gesCenterTerm = this.filterGesCenterState();
+    const createdBy = this.filterCreatedByState();
 
+    if (createdBy !== null) {
+      filtered = filtered.filter(idea => idea.createdBy === createdBy);
+    }
     if (idTerm) {
       filtered = filtered.filter(idea => idea.id.toString().includes(idTerm));
     }
@@ -94,6 +99,11 @@ export class IdeaService {
     this.paginationState.update(p => ({ ...p, currentPage: 1 }));
   }
 
+  setFilterCreatedBy(userId: number | null): void {
+    this.filterCreatedByState.set(userId);
+    this.paginationState.update(p => ({ ...p, currentPage: 1 }));
+  }
+
   setFilterGesCenter(gesCenter: string): void {
     this.filterGesCenterState.set(gesCenter);
     this.paginationState.update(p => ({ ...p, currentPage: 1 }));
@@ -103,6 +113,7 @@ export class IdeaService {
     this.searchIdState.set('');
     this.filterTypeState.set('');
     this.filterGesCenterState.set('');
+    this.filterCreatedByState.set(null);
     this.paginationState.update(p => ({ ...p, currentPage: 1 }));
   }
 

@@ -34,6 +34,7 @@
       "type": "Type",
       "gesCenter": "GES Center",
       "contributor": "Contributor",
+      "createdDate": "Created Date",
       "votes": "Votes",
       "action": "Action",
       "edit": "Edit",
